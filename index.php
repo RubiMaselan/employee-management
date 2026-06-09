@@ -1,6 +1,6 @@
 <?php
-$pageTitle = 'Dashboard';
-require_once 'config/database.php';
+$pageTitle = 'Dashboard';   
+require_once 'config/database.php'; //make sure correct path
 require_once 'includes/header.php';
 
 // ── Stats ──────────────────────────────────────────────
