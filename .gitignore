@@ -1,0 +1,16 @@
+# Database config (contains your password)
+config/database.php
+
+# Windows junk
+Thumbs.db
+desktop.ini
+
+# Mac junk
+.DS_Store
+
+# Code editor folders
+.vscode/
+.idea/
+
+# Laragon/PHP logs
+*.log
