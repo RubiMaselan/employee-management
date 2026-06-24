@@ -1,7 +1,7 @@
 </div><!-- /.main-content -->
 
 <!-- Bootstrap 5 JS Bundle -->
-<script 
+<script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoY9F0sA7MsXK3p4YfRvH+8abtTE1Pi6jizoU8fWj7Sk6b"
     crossorigin="anonymous">
