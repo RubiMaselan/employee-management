@@ -1,13 +1,14 @@
 <?php
 // ── All logic BEFORE any output ────────────────────────
 require_once 'config/database.php';
+define('EMPLOYEE_LIST', 'employees.php');
 
 $pageTitle = 'Edit Employee';
 
 // ── Validate ID ────────────────────────────────────────
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header('Location: employees.php');
-    exit;
+    header('Location: ' . EMPLOYEE_LIST);
+exit;
 }
 $id = (int) $_GET['id'];
 
@@ -18,12 +19,12 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if (mysqli_num_rows($result) === 0) {
-    header('Location: employees.php');
-    exit;
+   header('Location: ' . EMPLOYEE_LIST);
+exit;
 }
 if (mysqli_num_rows($result) === 0) {
-    header('Location: employees.php');
-    exit;
+    header('Location: ' . EMPLOYEE_LIST);
+exit;
 }
 $emp    = mysqli_fetch_assoc($result);
 $errors = [];
@@ -175,91 +176,116 @@ $col      = $colours[abs(crc32($email)) % count($colours)];
     <form method="POST" action="edit_employee.php?id=<?= $id ?>" novalidate>
 
         <!-- Row 1 -->
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label class="form-label">First Name <span style="color:var(--accent)">*</span></label>
-                <input type="text" name="first_name" class="form-control"
-                       value="<?= htmlspecialchars($emp['first_name']) ?>" required>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Last Name <span style="color:var(--accent)">*</span></label>
-                <input type="text" name="last_name" class="form-control"
-                       value="<?= htmlspecialchars($emp['last_name']) ?>" required>
-            </div>
-        </div>
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label for="first_name" class="form-label">
+            First Name <span style="color:var(--accent)">*</span>
+        </label>
+        <input type="text" id="first_name" name="first_name" class="form-control"
+               value="<?= htmlspecialchars($emp['first_name']) ?>" required>
+    </div>
 
-        <!-- Row 2 -->
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label class="form-label">Email Address <span style="color:var(--accent)">*</span></label>
-                <input type="email" name="email" class="form-control"
-                       value="<?= htmlspecialchars($emp['email']) ?>" required>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Phone Number</label>
-                <input type="text" name="phone" class="form-control"
-                       value="<?= htmlspecialchars($emp['phone']) ?>" placeholder="+60 12-345 6789">
-            </div>
-        </div>
+    <div class="col-md-6">
+        <label for="last_name" class="form-label">
+            Last Name <span style="color:var(--accent)">*</span>
+        </label>
+        <input type="text" id="last_name" name="last_name" class="form-control"
+               value="<?= htmlspecialchars($emp['last_name']) ?>" required>
+    </div>
+</div>
 
-        <!-- Row 3 -->
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label class="form-label">Department</label>
-                <select name="department" class="form-select">
-                    <option value="">— Select Department —</option>
-                    <?php foreach ($departments as $d) : ?>
-                    <option value="<?= $d ?>" <?= ($emp['department'] === $d) ? 'selected' : '' ?>>
-                        <?= $d ?>
-                    </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label">Position / Job Title</label>
-                <select name="position" class="form-select">
-                    <option value="">— Select Position —</option>
-                    <?php foreach ($positions as $p) : ?>
-                    <option value="<?= $p ?>" <?= ($emp['position'] === $p) ? 'selected' : '' ?>>
-                        <?= $p ?>
-                    </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        </div>
+<!-- Row 2 -->
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label for="email" class="form-label">
+            Email Address <span style="color:var(--accent)">*</span>
+        </label>
+        <input type="email" id="email" name="email" class="form-control"
+               value="<?= htmlspecialchars($emp['email']) ?>" required>
+    </div>
 
-        <!-- Row 4 -->
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <label class="form-label">Monthly Salary (RM)</label>
-                <input type="number" name="salary" class="form-control" step="0.01" min="0"
-                       value="<?= htmlspecialchars($emp['salary']) ?>">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Hire Date</label>
-                <input type="date" name="hire_date" class="form-control"
-                       value="<?= htmlspecialchars($emp['hire_date']) ?>">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="Active"   <?= ($emp['status'] === 'Active')   ? 'selected' : '' ?>>Active</option>
-                    <option value="Inactive" <?= ($emp['status'] === 'Inactive') ? 'selected' : '' ?>>Inactive</option>
-                </select>
-            </div>
-        </div>
+    <div class="col-md-6">
+        <label for="phone" class="form-label">
+            Phone Number
+        </label>
+        <input type="text" id="phone" name="phone" class="form-control"
+               value="<?= htmlspecialchars($emp['phone']) ?>" placeholder="+60 12-345 6789">
+    </div>
+</div>
 
-        <!-- Actions -->
-        <div class="d-flex gap-2 mt-4 pt-2" style="border-top:1px solid var(--border);">
-            <button type="submit" class="btn btn-accent">
-                <i class="bi bi-floppy-fill me-1"></i> Save Changes
-            </button>
-            <a href="employees.php" class="btn btn-sm"
-               style="background:var(--border);color:var(--text);border:none;border-radius:8px;padding:.55rem 1.1rem;">
-                Cancel
-            </a>
-        </div>
-    </form>
+<!-- Row 3 -->
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label for="department" class="form-label">
+            Department
+        </label>
+        <select id="department" name="department" class="form-select">
+            <option value="">— Select Department —</option>
+            <?php foreach ($departments as $d) : ?>
+                <option value="<?= $d ?>" <?= ($emp['department'] === $d) ? 'selected' : '' ?>>
+                    <?= $d ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label for="position" class="form-label">
+            Position / Job Title
+        </label>
+        <select id="position" name="position" class="form-select">
+            <option value="">— Select Position —</option>
+            <?php foreach ($positions as $p) : ?>
+                <option value="<?= $p ?>" <?= ($emp['position'] === $p) ? 'selected' : '' ?>>
+                    <?= $p ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+</div>
+
+<!-- Row 4 -->
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label for="salary" class="form-label">
+            Monthly Salary (RM)
+        </label>
+        <input type="number" id="salary" name="salary" class="form-control"
+               step="0.01" min="0"
+               value="<?= htmlspecialchars($emp['salary']) ?>">
+    </div>
+
+    <div class="col-md-4">
+        <label for="hire_date" class="form-label">
+            Hire Date
+        </label>
+        <input type="date" id="hire_date" name="hire_date" class="form-control"
+               value="<?= htmlspecialchars($emp['hire_date']) ?>">
+    </div>
+
+    <div class="col-md-4">
+        <label for="status" class="form-label">
+            Status
+        </label>
+        <select id="status" name="status" class="form-select">
+            <option value="Active" <?= ($emp['status'] === 'Active') ? 'selected' : '' ?>>Active</option>
+            <option value="Inactive" <?= ($emp['status'] === 'Inactive') ? 'selected' : '' ?>>Inactive</option>
+        </select>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="d-flex gap-2 mt-4 pt-2" style="border-top:1px solid var(--border);">
+    <button type="submit" class="btn btn-accent">
+        <i class="bi bi-floppy-fill me-1"></i> Save Changes
+    </button>
+    <a href="employees.php" class="btn btn-sm"
+       style="background:var(--border);color:var(--text);border:none;border-radius:8px;padding:.55rem 1.1rem;">
+        Cancel
+    </a>
+</div>
+
+</form>
 </div>
 
 <?php require_once 'includes/footer.php'; ?>
