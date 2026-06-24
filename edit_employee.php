@@ -8,25 +8,22 @@ $pageTitle = 'Edit Employee';
 // ── Validate ID ────────────────────────────────────────
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header('Location: ' . EMPLOYEE_LIST);
-exit;
+    exit;
 }
+
 $id = (int) $_GET['id'];
 
-// ── Fetch existing record ──────────────────────────────
 $stmt = $conn->prepare("SELECT * FROM employees WHERE id = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if (mysqli_num_rows($result) === 0) {
-   header('Location: ' . EMPLOYEE_LIST);
-exit;
-}
-if (mysqli_num_rows($result) === 0) {
     header('Location: ' . EMPLOYEE_LIST);
-exit;
+    exit;
 }
-$emp    = mysqli_fetch_assoc($result);
+
+$emp = mysqli_fetch_assoc($result);
 $errors = [];
 
 // ── Handle form submission ─────────────────────────────
