@@ -56,12 +56,14 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
 <!-- ── Toolbar ─────────────────────────────────────────── -->
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <div class="search-wrap flex-grow-1" style="max-width:380px;">
-        <i class="bi bi-search"></i>
-        <input type="text" id="searchInput" class="form-control" placeholder="Search employees…">
-    </div>
-    <a href="add_employee.php" class="btn btn-accent ms-auto">
-        <i class="bi bi-plus-lg me-1"></i> Add Employee
-    </a>
+    <label for="searchInput" class="visually-hidden">
+        Search employees
+    </label>
+
+    <i class="bi bi-search"></i>
+
+    <input type="text" id="searchInput" class="form-control"
+           placeholder="Search employees…">
 </div>
 
 <!-- ── Table card ─────────────────────────────────────── -->
