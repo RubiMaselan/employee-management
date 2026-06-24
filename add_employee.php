@@ -20,19 +20,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status      = ($_POST['status'] === 'Inactive') ? 'Inactive' : 'Active';
 
     // Validate
-    if (!$first_name)  $errors[] = 'First name is required.';
-    if (!$last_name)   $errors[] = 'Last name is required.';
-    if (!$email)       $errors[] = 'Email is required.';
-    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Invalid email format.';
-    if ($salary !== '' && !is_numeric($salary)) $errors[] = 'Salary must be a number.';
+    if (!$first_name) {
+    $errors[] = 'First name is required.';
+}
+
+if (!$last_name) {
+    $errors[] = 'Last name is required.';
+}
+
+if (!$email) {
+    $errors[] = 'Email is required.';
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = 'Invalid email format.';
+}
+
+if ($salary !== '' && !is_numeric($salary)) {
+    $errors[] = 'Salary must be a number.';
+}
 
     // Check duplicate email
     if (!$errors) {
-        $check = mysqli_query($conn, "SELECT id FROM employees WHERE email='$email'");
-        if (mysqli_num_rows($check) > 0) {
-            $errors[] = 'An employee with this email already exists.';
-        }
+    $stmt = $conn->prepare("SELECT id FROM employees WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $errors[] = 'An employee with this email already exists.';
     }
+
+    $stmt->close();
+}
 
     // Insert
     if (!$errors) {
@@ -62,7 +80,9 @@ $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Anal
      style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);">
     <strong><i class="bi bi-exclamation-circle-fill me-2"></i>Please fix the following:</strong>
     <ul class="mb-0 mt-1 ps-3">
-        <?php foreach ($errors as $e) echo "<li>".htmlspecialchars($e)."</li>"; ?>
+        <?php foreach ($errors as $e) { ?>
+    <li><?= htmlspecialchars($e) ?></li>
+<?php } ?>
     </ul>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
@@ -78,81 +98,110 @@ $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Anal
         <!-- Row 1 -->
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label class="form-label">First Name <span style="color:var(--accent)">*</span></label>
-                <input type="text" name="first_name" class="form-control"
-                       value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>"
-                       placeholder="e.g. Ahmad" required>
-            </div>
+    <label for="first_name" class="form-label">
+        First Name <span style="color:var(--accent)">*</span>
+    </label>
+
+    <input type="text" id="first_name" name="first_name" class="form-control"
+           value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>"
+           placeholder="e.g. Ahmad" required>
+</div>
             <div class="col-md-6">
-                <label class="form-label">Last Name <span style="color:var(--accent)">*</span></label>
-                <input type="text" name="last_name" class="form-control"
-                       value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>"
-                       placeholder="e.g. Razali" required>
-            </div>
+    <label for="last_name" class="form-label">
+        Last Name <span style="color:var(--accent)">*</span>
+    </label>
+
+    <input type="text" id="last_name" name="last_name" class="form-control"
+           value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>"
+           placeholder="e.g. Razali" required>
+</div>
         </div>
 
         <!-- Row 2 -->
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label class="form-label">Email Address <span style="color:var(--accent)">*</span></label>
-                <input type="email" name="email" class="form-control"
-                       value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                       placeholder="ahmad@company.com" required>
-            </div>
+    <label for="email" class="form-label">
+        Email Address <span style="color:var(--accent)">*</span>
+    </label>
+
+    <input type="email" id="email" name="email" class="form-control"
+           value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+           placeholder="ahmad@company.com" required>
+</div>
             <div class="col-md-6">
-                <label class="form-label">Phone Number</label>
-                <input type="text" name="phone" class="form-control"
-                       value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>"
-                       placeholder="+60 12-345 6789">
-            </div>
+    <label for="phone" class="form-label">
+        Phone Number
+    </label>
+
+    <input type="text" id="phone" name="phone" class="form-control"
+           value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>"
+           placeholder="+60 12-345 6789">
+</div>
         </div>
 
         <!-- Row 3 -->
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label class="form-label">Department</label>
-                <select name="department" class="form-select">
-                    <option value="">— Select Department —</option>
-                    <?php foreach ($departments as $d) : ?>
-                    <option value="<?= $d ?>" <?= (($_POST['department'] ?? '') === $d) ? 'selected' : '' ?>>
-                        <?= $d ?>
-                    </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+    <label for="department" class="form-label">
+        Department
+    </label>
+
+    <select id="department" name="department" class="form-select">
+        <option value="">— Select Department —</option>
+        <?php foreach ($departments as $d) : ?>
+            <option value="<?= $d ?>" <?= (($_POST['department'] ?? '') === $d) ? 'selected' : '' ?>>
+                <?= $d ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
             <div class="col-md-6">
-                <label class="form-label">Position / Job Title</label>
-                <select name="position" class="form-select">
-                    <option value="">— Select Position —</option>
-                    <?php foreach ($positions as $p) : ?>
-                    <option value="<?= $p ?>" <?= (($_POST['position'] ?? '') === $p) ? 'selected' : '' ?>>
-                        <?= $p ?>
-                    </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+    <label for="position" class="form-label">
+        Position / Job Title
+    </label>
+
+    <select id="position" name="position" class="form-select">
+        <option value="">— Select Position —</option>
+        <?php foreach ($positions as $p) : ?>
+            <option value="<?= $p ?>" <?= (($_POST['position'] ?? '') === $p) ? 'selected' : '' ?>>
+                <?= $p ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
         </div>
 
         <!-- Row 4 -->
         <div class="row g-3 mb-3">
             <div class="col-md-4">
-                <label class="form-label">Monthly Salary (RM)</label>
-                <input type="number" name="salary" class="form-control" step="0.01" min="0"
-                       value="<?= htmlspecialchars($_POST['salary'] ?? '') ?>"
-                       placeholder="3500.00">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Hire Date</label>
-                <input type="date" name="hire_date" class="form-control"
-                       value="<?= htmlspecialchars($_POST['hire_date'] ?? '') ?>">
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="Active"   <?= (($_POST['status'] ?? 'Active') === 'Active')   ? 'selected':'' ?>>Active</option>
-                    <option value="Inactive" <?= (($_POST['status'] ?? '')        === 'Inactive') ? 'selected':'' ?>>Inactive</option>
-                </select>
-            </div>
+    <label for="salary" class="form-label">
+        Monthly Salary (RM)
+    </label>
+
+    <input type="number" id="salary" name="salary" class="form-control" step="0.01" min="0"
+           value="<?= htmlspecialchars($_POST['salary'] ?? '') ?>"
+           placeholder="3500.00">
+</div>
+
+<div class="col-md-4">
+    <label for="hire_date" class="form-label">
+        Hire Date
+    </label>
+
+    <input type="date" id="hire_date" name="hire_date" class="form-control"
+           value="<?= htmlspecialchars($_POST['hire_date'] ?? '') ?>">
+</div>
+
+<div class="col-md-4">
+    <label for="status" class="form-label">
+        Status
+    </label>
+
+    <select id="status" name="status" class="form-select">
+        <option value="Active"   <?= (($_POST['status'] ?? 'Active') === 'Active') ? 'selected' : '' ?>>Active</option>
+        <option value="Inactive" <?= (($_POST['status'] ?? '') === 'Inactive') ? 'selected' : '' ?>>Inactive</option>
+    </select>
+</div>
         </div>
 
         <!-- Actions -->
