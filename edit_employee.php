@@ -12,7 +12,15 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $id = (int) $_GET['id'];
 
 // ── Fetch existing record ──────────────────────────────
-$result = mysqli_query($conn, "SELECT * FROM employees WHERE id = $id");
+$stmt = $conn->prepare("SELECT * FROM employees WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if (mysqli_num_rows($result) === 0) {
+    header('Location: employees.php');
+    exit;
+}
 if (mysqli_num_rows($result) === 0) {
     header('Location: employees.php');
     exit;
@@ -23,68 +31,98 @@ $errors = [];
 // ── Handle form submission ─────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $first_name  = trim(mysqli_real_escape_string($conn, $_POST['first_name']));
-    $last_name   = trim(mysqli_real_escape_string($conn, $_POST['last_name']));
-    $email       = trim(mysqli_real_escape_string($conn, $_POST['email']));
-    $phone       = trim(mysqli_real_escape_string($conn, $_POST['phone']));
-    $department  = trim(mysqli_real_escape_string($conn, $_POST['department']));
-    $position    = trim(mysqli_real_escape_string($conn, $_POST['position']));
-    $salary      = trim(mysqli_real_escape_string($conn, $_POST['salary']));
-    $hire_date   = trim(mysqli_real_escape_string($conn, $_POST['hire_date']));
-    $status      = ($_POST['status'] === 'Inactive') ? 'Inactive' : 'Active';
+    $first_name = trim($_POST['first_name']);
+    $last_name  = trim($_POST['last_name']);
+    $email      = trim($_POST['email']);
+    $phone      = trim($_POST['phone']);
+    $department = trim($_POST['department']);
+    $position   = trim($_POST['position']);
+    $salary     = trim($_POST['salary']);
+    $hire_date  = trim($_POST['hire_date']);
+    $status     = ($_POST['status'] === 'Inactive') ? 'Inactive' : 'Active';
 
     // Validate
-    if (!$first_name)  $errors[] = 'First name is required.';
-    if (!$last_name)   $errors[] = 'Last name is required.';
-    if (!$email)       $errors[] = 'Email is required.';
-    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Invalid email format.';
-    if ($salary !== '' && !is_numeric($salary)) $errors[] = 'Salary must be a number.';
+    if (!$first_name) {
+        $errors[] = 'First name is required.';
+    }
+
+if (!$last_name) {
+    $errors[] = 'Last name is required.';
+}
+
+if (!$email) {
+    $errors[] = 'Email is required.';
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = 'Invalid email format.';
+}
+
+if ($salary !== '' && !is_numeric($salary)) {
+    $errors[] = 'Salary must be a number.';
+}
 
     // Check duplicate email (exclude current employee)
     if (!$errors) {
-        $check = mysqli_query($conn, "SELECT id FROM employees WHERE email='$email' AND id != $id");
-        if (mysqli_num_rows($check) > 0) {
-            $errors[] = 'Another employee already uses this email.';
-        }
+    $stmt = $conn->prepare("SELECT id FROM employees WHERE email = ? AND id != ?");
+    $stmt->bind_param("si", $email, $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $errors[] = 'Another employee already uses this email.';
     }
+
+    $stmt->close();
+}
 
     // Update
     if (!$errors) {
-        $salaryVal = $salary !== '' ? "'$salary'" : 'NULL';
-        $dateVal   = $hire_date   !== '' ? "'$hire_date'"   : 'NULL';
+    $stmt = $conn->prepare("
+        UPDATE employees SET
+            first_name = ?,
+            last_name = ?,
+            email = ?,
+            phone = ?,
+            department = ?,
+            position = ?,
+            salary = ?,
+            hire_date = ?,
+            status = ?
+        WHERE id = ?
+    ");
 
-        $sql = "UPDATE employees SET
-                    first_name  = '$first_name',
-                    last_name   = '$last_name',
-                    email       = '$email',
-                    phone       = '$phone',
-                    department  = '$department',
-                    position    = '$position',
-                    salary      = $salaryVal,
-                    hire_date   = $dateVal,
-                    status      = '$status'
-                WHERE id = $id";
+    $stmt->bind_param(
+        "ssssssdsii",
+        $first_name,
+        $last_name,
+        $email,
+        $phone,
+        $department,
+        $position,
+        $salary,
+        $hire_date,
+        $status,
+        $id
+    );
 
-        if (mysqli_query($conn, $sql)) {
-            header('Location: employees.php?success=updated');
-            exit;
-        } else {
-            $errors[] = 'Database error: ' . mysqli_error($conn);
-        }
-    }
+    $stmt->execute();
+    $stmt->close();
+
+    header('Location: employees.php?success=updated');
+    exit;
+}
 
     // Repopulate with submitted values on error
     $emp = array_merge($emp, [
-        'first_name' => $_POST['first_name'],
-        'last_name'  => $_POST['last_name'],
-        'email'      => $_POST['email'],
-        'phone'      => $_POST['phone'],
-        'department' => $_POST['department'],
-        'position'   => $_POST['position'],
-        'salary'     => $_POST['salary'],
-        'hire_date'  => $_POST['hire_date'],
-        'status'     => $_POST['status'],
-    ]);
+    'first_name' => htmlspecialchars($_POST['first_name'] ?? ''),
+    'last_name'  => htmlspecialchars($_POST['last_name'] ?? ''),
+    'email'      => htmlspecialchars($_POST['email'] ?? ''),
+    'phone'      => htmlspecialchars($_POST['phone'] ?? ''),
+    'department' => htmlspecialchars($_POST['department'] ?? ''),
+    'position'   => htmlspecialchars($_POST['position'] ?? ''),
+    'salary'     => htmlspecialchars($_POST['salary'] ?? ''),
+    'hire_date'  => htmlspecialchars($_POST['hire_date'] ?? ''),
+    'status'     => htmlspecialchars($_POST['status'] ?? ''),
+]);
 }
 
 require_once 'includes/header.php';
@@ -98,7 +136,7 @@ $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Anal
      style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);">
     <strong><i class="bi bi-exclamation-circle-fill me-2"></i>Please fix the following:</strong>
     <ul class="mb-0 mt-1 ps-3">
-        <?php foreach ($errors as $e) echo "<li>".htmlspecialchars($e)."</li>"; ?>
+        <?php foreach ($errors as $e) { echo "<li>" . htmlspecialchars($e) . "</li>"; } ?>
     </ul>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
@@ -106,15 +144,20 @@ $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Anal
 
 <!-- Employee info strip -->
 <?php
-$initials = strtoupper(substr($emp['first_name'],0,1).substr($emp['last_name'],0,1));
+$first = htmlspecialchars($emp['first_name'] ?? '');
+$last  = htmlspecialchars($emp['last_name'] ?? '');
+$email = htmlspecialchars($emp['email'] ?? '');
+
+$initials = strtoupper(substr($first, 0, 1) . substr($last, 0, 1));
+
 $colours  = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
-$col      = $colours[crc32($emp['email']) % count($colours)];
+$col      = $colours[abs(crc32($email)) % count($colours)];
 ?>
 <div class="d-flex align-items-center gap-3 mb-4 p-3"
      style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">
     <div class="avatar" style="width:52px;height:52px;font-size:1.1rem;background:<?= $col ?>22;color:<?= $col ?>">
-        <?= $initials ?>
-    </div>
+    <?= htmlspecialchars($initials) ?>
+</div>
     <div>
         <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">
             <?= htmlspecialchars($emp['first_name'].' '.$emp['last_name']) ?>
