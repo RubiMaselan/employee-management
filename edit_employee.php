@@ -138,7 +138,7 @@ $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Anal
 
 <?php if ($errors) : ?>
 <div class="alert ems-alert alert-dismissible fade show mb-3" role="alert"
-     style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);">
+     style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">
     <strong><i class="bi bi-exclamation-circle-fill me-2"></i>Please fix the following:</strong>
     <ul class="mb-0 mt-1 ps-3">
         <?php foreach ($errors as $e) { echo "<li>" . htmlspecialchars($e) . "</li>"; } ?>
@@ -155,16 +155,16 @@ $email = htmlspecialchars($emp['email'] ?? '');
 
 $initials = strtoupper(substr($first, 0, 1) . substr($last, 0, 1));
 
-$colours  = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
+$colours  = ['#4f46e5','#0ea5e9','#8b5cf6','#059669','#d97706','#db2777'];
 $col      = $colours[abs(crc32($email)) % count($colours)];
 ?>
 <div class="d-flex align-items-center gap-3 mb-4 p-3"
-     style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);">
+     style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);">
     <div class="avatar" style="width:52px;height:52px;font-size:1.1rem;background:<?= $col ?>22;color:<?= $col ?>">
     <?= htmlspecialchars($initials) ?>
 </div>
     <div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;">
             <?= htmlspecialchars($emp['first_name'].' '.$emp['last_name']) ?>
         </div>
         <div style="color:var(--muted);font-size:.8rem;">
@@ -283,10 +283,7 @@ $col      = $colours[abs(crc32($email)) % count($colours)];
     <button type="submit" class="btn btn-accent">
         <i class="bi bi-floppy-fill me-1"></i> Save Changes
     </button>
-    <a href="employees.php" class="btn btn-sm"
-       style="background:var(--border);color:var(--text);border:none;border-radius:8px;padding:.55rem 1.1rem;">
-        Cancel
-    </a>
+    <a href="employees.php" class="btn btn-muted">Cancel</a>
 </div>
 
 </form>

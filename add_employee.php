@@ -95,7 +95,7 @@ $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Anal
 
 <?php if ($errors) : ?>
 <div class="alert ems-alert alert-dismissible fade show mb-3" role="alert"
-     style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);">
+     style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">
     <strong><i class="bi bi-exclamation-circle-fill me-2"></i>Please fix the following:</strong>
     <ul class="mb-0 mt-1 ps-3">
         <?php foreach ($errors as $e) { ?>
@@ -227,10 +227,7 @@ $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Anal
             <button type="submit" class="btn btn-accent">
                 <i class="bi bi-person-plus-fill me-1"></i> Add Employee
             </button>
-            <a href="employees.php" class="btn btn-sm"
-               style="background:var(--border);color:var(--text);border:none;border-radius:8px;padding:.55rem 1.1rem;">
-                Cancel
-            </a>
+            <a href="employees.php" class="btn btn-muted">Cancel</a>
         </div>
     </form>
 </div>

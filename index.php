@@ -16,17 +16,17 @@ $deptResult = mysqli_query($conn, "SELECT department, COUNT(*) as cnt FROM emplo
 $recentResult = mysqli_query($conn, "SELECT * FROM employees ORDER BY created_at DESC LIMIT 5");
 
 // Avatar colour palette
-$colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
+$colours = ['#4f46e5','#0ea5e9','#8b5cf6','#059669','#d97706','#db2777'];
 ?>
 
 <!-- ── Stat cards ──────────────────────────────────────── -->
 <div class="row g-3 mb-4">
     <?php
     $stats = [
-        ['Total Employees',   $total,    'bi-people-fill',       '#e94560', 'rgba(233,69,96,.15)'],
-        ['Active',            $active,   'bi-person-check-fill', '#10b981', 'rgba(16,185,129,.15)'],
-        ['Inactive',          $inactive, 'bi-person-x-fill',     '#f59e0b', 'rgba(245,158,11,.15)'],
-        ['Avg. Salary (RM)',  number_format($avgSalary, 2), 'bi-cash-coin', '#3b82f6', 'rgba(59,130,246,.15)'],
+        ['Total Employees',   $total,    'bi-people-fill',       '#4f46e5', '#eef2ff'],
+        ['Active',            $active,   'bi-person-check-fill', '#059669', '#ecfdf5'],
+        ['Inactive',          $inactive, 'bi-person-x-fill',     '#d97706', '#fffbeb'],
+        ['Avg. Salary (RM)',  number_format($avgSalary, 2), 'bi-cash-coin', '#0ea5e9', '#f0f9ff'],
     ];
     foreach ($stats as [$label, $value, $icon, $color, $bg]) : ?>
     <div class="col-6 col-xl-3">
@@ -50,8 +50,8 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
     <div class="col-lg-8">
         <div class="ems-card h-100">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="mb-0" style="font-family:'Syne',sans-serif;font-weight:700;">Recent Employees</h6>
-                <a href="employees.php" class="btn-accent btn" style="padding:.4rem .9rem;font-size:.78rem;">View All</a>
+                <h6 class="mb-0" style="font-weight:700;">Recent Employees</h6>
+                <a href="employees.php" class="btn btn-accent" style="padding:.4rem .9rem;font-size:.78rem;">View All</a>
             </div>
 
             <?php if (mysqli_num_rows($recentResult) === 0) : ?>
@@ -99,7 +99,7 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
     <!-- Department breakdown -->
     <div class="col-lg-4">
         <div class="ems-card h-100">
-            <h6 class="mb-3" style="font-family:'Syne',sans-serif;font-weight:700;">By Department</h6>
+            <h6 class="mb-3" style="font-weight:700;">By Department</h6>
 
             <?php if (mysqli_num_rows($deptResult) === 0) : ?>
                 <p style="color:var(--muted);font-size:.85rem;">No department data yet.</p>
@@ -116,13 +116,13 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
                     <span><?= htmlspecialchars($row['department']) ?></span>
                     <span style="color:var(--muted);"><?= $row['cnt'] ?></span>
                 </div>
-                <div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;">
-                    <div style="height:100%;width:<?= $pct ?>%;background:<?= $col ?>;border-radius:3px;transition:width .6s;"></div>
+                <div style="height:7px;background:#eef2f7;border-radius:4px;overflow:hidden;">
+                    <div style="height:100%;width:<?= $pct ?>%;background:<?= $col ?>;border-radius:4px;transition:width .6s;"></div>
                 </div>
             </div>
             <?php endforeach; endif; ?>
 
-            <a href="add_employee.php" class="btn-accent btn w-100 mt-3" style="font-size:.83rem;">
+            <a href="add_employee.php" class="btn btn-accent w-100 mt-3" style="font-size:.83rem;">
                 <i class="bi bi-plus-lg me-1"></i> Add Employee
             </a>
         </div>

@@ -42,18 +42,18 @@ if ($deleteFailed) {
 $result = mysqli_query($conn, "SELECT * FROM employees ORDER BY created_at DESC");
 
 // Palette for avatars
-$colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
+$colours = ['#4f46e5','#0ea5e9','#8b5cf6','#059669','#d97706','#db2777'];
 ?>
 
 <?php if ($success) : ?>
-<div class="alert ems-alert alert-success auto-dismiss alert-dismissible fade show mb-3" role="alert" style="background:rgba(16,185,129,.12);color:#4ade80;border:1px solid rgba(16,185,129,.25);">
+<div class="alert ems-alert alert-success auto-dismiss alert-dismissible fade show mb-3" role="alert" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;">
     <i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($success) ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 <?php endif; ?>
 
 <?php if ($error) : ?>
-<div class="alert ems-alert alert-danger auto-dismiss alert-dismissible fade show mb-3" role="alert" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);">
+<div class="alert ems-alert alert-danger auto-dismiss alert-dismissible fade show mb-3" role="alert" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;">
     <i class="bi bi-exclamation-circle-fill me-2"></i><?= htmlspecialchars($error) ?>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
@@ -88,7 +88,7 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
         <?php if (mysqli_num_rows($result) === 0) : ?>
             <div class="text-center py-5" style="color:var(--muted);">
                 <i class="bi bi-people" style="font-size:2.5rem;display:block;margin-bottom:.75rem;"></i>
-                No employees found. <a href="add_employee.php" style="color:var(--accent-soft);">Add your first one!</a>
+                No employees found. <a href="add_employee.php" style="color:var(--accent);font-weight:600;">Add your first one!</a>
             </div>
         <?php else : ?>
         <table class="ems-table" id="employeeTable">
@@ -164,7 +164,7 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h6 class="modal-title" style="font-family:'Syne',sans-serif;font-weight:700;">
+                <h6 class="modal-title" style="font-weight:700;">
                     <i class="bi bi-exclamation-triangle text-danger me-2"></i>Delete Employee
                 </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -173,11 +173,10 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
                 Are you sure you want to delete <strong id="deleteName" style="color:var(--text);"></strong>? This action cannot be undone.
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-sm" data-bs-dismiss="modal"
-                    style="background:var(--border);color:var(--text);border:none;border-radius:7px;padding:.45rem 1rem;">
+                <button type="button" class="btn btn-sm btn-muted" data-bs-dismiss="modal">
                     Cancel
                 </button>
-                <a id="deleteConfirmBtn" href="#" class="btn btn-sm btn-danger" style="border-radius:7px;padding:.45rem 1rem;">
+                <a id="deleteConfirmBtn" href="#" class="btn btn-sm btn-danger" style="border-radius:10px;padding:.5rem 1.1rem;">
                     Delete
                 </a>
             </div>
