@@ -29,15 +29,15 @@ $errors = [];
 // ── Handle form submission ─────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $first_name = trim($_POST['first_name']);
-    $last_name  = trim($_POST['last_name']);
-    $email      = trim($_POST['email']);
-    $phone      = trim($_POST['phone']);
-    $department = trim($_POST['department']);
-    $position   = trim($_POST['position']);
-    $salary     = trim($_POST['salary']);
-    $hire_date  = trim($_POST['hire_date']);
-    $status     = ($_POST['status'] === 'Inactive') ? 'Inactive' : 'Active';
+    $first_name = trim($_POST['first_name'] ?? '');
+    $last_name  = trim($_POST['last_name'] ?? '');
+    $email      = trim($_POST['email'] ?? '');
+    $phone      = trim($_POST['phone'] ?? '');
+    $department = trim($_POST['department'] ?? '');
+    $position   = trim($_POST['position'] ?? '');
+    $salary     = trim($_POST['salary'] ?? '');
+    $hire_date  = trim($_POST['hire_date'] ?? '');
+    $status     = (($_POST['status'] ?? '') === 'Inactive') ? 'Inactive' : 'Active';
 
     // Validate
     if (!$first_name) {
@@ -88,44 +88,51 @@ if ($salary !== '' && !is_numeric($salary)) {
         WHERE id = ?
     ");
 
+    $salaryVal = $salary !== '' ? (float) $salary : null;
+    $dateVal   = $hire_date !== '' ? $hire_date : null;
+
     $stmt->bind_param(
-        "ssssssdsii",
+        "ssssssdssi",
         $first_name,
         $last_name,
         $email,
         $phone,
         $department,
         $position,
-        $salary,
-        $hire_date,
+        $salaryVal,
+        $dateVal,
         $status,
         $id
     );
 
-    $stmt->execute();
+    $updated = $stmt->execute();
     $stmt->close();
 
-    header('Location: employees.php?success=updated');
-    exit;
+    if ($updated) {
+        header('Location: employees.php?success=updated');
+        exit;
+    }
+
+    $errors[] = 'Database error: could not save changes.';
 }
 
     // Repopulate with submitted values on error
     $emp = array_merge($emp, [
-    'first_name' => htmlspecialchars($_POST['first_name'] ?? ''),
-    'last_name'  => htmlspecialchars($_POST['last_name'] ?? ''),
-    'email'      => htmlspecialchars($_POST['email'] ?? ''),
-    'phone'      => htmlspecialchars($_POST['phone'] ?? ''),
-    'department' => htmlspecialchars($_POST['department'] ?? ''),
-    'position'   => htmlspecialchars($_POST['position'] ?? ''),
-    'salary'     => htmlspecialchars($_POST['salary'] ?? ''),
-    'hire_date'  => htmlspecialchars($_POST['hire_date'] ?? ''),
-    'status'     => htmlspecialchars($_POST['status'] ?? ''),
+    'first_name' => $first_name,
+    'last_name'  => $last_name,
+    'email'      => $email,
+    'phone'      => $phone,
+    'department' => $department,
+    'position'   => $position,
+    'salary'     => $salary,
+    'hire_date'  => $hire_date,
+    'status'     => $status,
 ]);
 }
 
 require_once 'includes/header.php';
 
-$departments = ['Engineering','Marketing','Sales','Human Resources','Finance','Operations','Design','Legal','Support'];
+$departments = ['Engineering','Marketing','Sales','Human Resources','Finance','Operations','Design','Legal','Support','Information Technology'];
 $positions   = ['Manager','Senior Developer','Junior Developer','Designer','Analyst','HR Executive','Sales Executive','Support Agent','Intern'];
 ?>
 
@@ -165,7 +172,7 @@ $col      = $colours[abs(crc32($email)) % count($colours)];
         </div>
     </div>
     <span class="status-badge ms-auto <?= $emp['status']==='Active'?'badge-active':'badge-inactive' ?>">
-        <?= $emp['status'] ?>
+        <?= htmlspecialchars($emp['status']) ?>
     </span>
 </div>
 
@@ -206,7 +213,7 @@ $col      = $colours[abs(crc32($email)) % count($colours)];
             Phone Number
         </label>
         <input type="text" id="phone" name="phone" class="form-control"
-               value="<?= htmlspecialchars($emp['phone']) ?>" placeholder="+60 12-345 6789">
+               value="<?= htmlspecialchars($emp['phone'] ?? '') ?>" placeholder="+60 12-345 6789">
     </div>
 </div>
 
@@ -249,7 +256,7 @@ $col      = $colours[abs(crc32($email)) % count($colours)];
         </label>
         <input type="number" id="salary" name="salary" class="form-control"
                step="0.01" min="0"
-               value="<?= htmlspecialchars($emp['salary']) ?>">
+               value="<?= htmlspecialchars($emp['salary'] ?? '') ?>">
     </div>
 
     <div class="col-md-4">
@@ -257,7 +264,7 @@ $col      = $colours[abs(crc32($email)) % count($colours)];
             Hire Date
         </label>
         <input type="date" id="hire_date" name="hire_date" class="form-control"
-               value="<?= htmlspecialchars($emp['hire_date']) ?>">
+               value="<?= htmlspecialchars($emp['hire_date'] ?? '') ?>">
     </div>
 
     <div class="col-md-4">

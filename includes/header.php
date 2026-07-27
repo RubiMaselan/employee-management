@@ -15,7 +15,7 @@
 <link
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     rel="stylesheet"
-    integrity="sha384-4Q6Gf2oB1Qq6Zl8n6v+8a7cQ4l5Q4Q3z3z3z3z3z3z3z3z3z3z3z3z3z3z3"
+    integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD"
     crossorigin="anonymous">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -289,10 +289,32 @@
         }
         .btn-close { filter: invert(1) brightness(.7); }
 
+        /* ── Sidebar toggle ── */
+        .sidebar-toggle {
+            display: none;
+            width: 38px; height: 38px;
+            border-radius: 8px; border: 1px solid var(--border);
+            background: var(--surface); color: var(--text);
+            align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer;
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.55);
+            z-index: 99;
+        }
+
+        .sidebar-backdrop.show { display: block; }
+
         /* ── Responsive ── */
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
+            .sidebar { transform: translateX(-100%); transition: transform .25s ease; }
+            .sidebar.open { transform: translateX(0); }
             .main-content { margin-left: 0; padding: 1.25rem; }
+            .sidebar-toggle { display: inline-flex; }
+            .topbar h4 { font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -318,10 +340,6 @@
             <i class="bi bi-person-plus"></i> Add Employee
         </a>
 
-        <div class="nav-label" style="margin-top:1rem;">System</div>
-        <a href="setup.php" class="nav-link">
-            <i class="bi bi-database"></i> DB Setup / Reset
-        </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -329,9 +347,16 @@
     </div>
 </aside>
 
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
 <!-- ════════════ MAIN ════════════ -->
 <div class="main-content">
     <div class="topbar">
-        <h4><?= isset($pageTitle) ? htmlspecialchars($pageTitle) : 'Dashboard' ?></h4>
+        <div class="d-flex align-items-center gap-2">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
+            </button>
+            <h4><?= isset($pageTitle) ? htmlspecialchars($pageTitle) : 'Dashboard' ?></h4>
+        </div>
         <span class="badge-env"><i class="bi bi-circle-fill me-1" style="font-size:.5rem;"></i>Live</span>
     </div>

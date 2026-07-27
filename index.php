@@ -69,7 +69,7 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
                 <tbody>
                 <?php while ($emp = mysqli_fetch_assoc($recentResult)) :
                     $initials = strtoupper(substr($emp['first_name'],0,1).substr($emp['last_name'],0,1));
-                    $col = $colours[crc32($emp['email']) % count($colours)];
+                    $col = $colours[abs(crc32($emp['email'])) % count($colours)];
                 ?>
                     <tr>
                         <td>
@@ -85,7 +85,7 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
                         <td style="color:var(--muted);font-size:.83rem;"><?= htmlspecialchars($emp['position']   ?: '—') ?></td>
                         <td>
                             <span class="status-badge <?= $emp['status']==='Active' ? 'badge-active' : 'badge-inactive' ?>">
-                                <?= $emp['status'] ?>
+                                <?= htmlspecialchars($emp['status']) ?>
                             </span>
                         </td>
                     </tr>

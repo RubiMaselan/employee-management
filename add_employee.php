@@ -8,16 +8,16 @@ $errors    = [];
 // ── Handle form submission ─────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Sanitise inputs
-    $first_name  = trim(mysqli_real_escape_string($conn, $_POST['first_name']));
-    $last_name   = trim(mysqli_real_escape_string($conn, $_POST['last_name']));
-    $email       = trim(mysqli_real_escape_string($conn, $_POST['email']));
-    $phone       = trim(mysqli_real_escape_string($conn, $_POST['phone']));
-    $department  = trim(mysqli_real_escape_string($conn, $_POST['department']));
-    $position    = trim(mysqli_real_escape_string($conn, $_POST['position']));
-    $salary      = trim(mysqli_real_escape_string($conn, $_POST['salary']));
-    $hire_date   = trim(mysqli_real_escape_string($conn, $_POST['hire_date']));
-    $status      = ($_POST['status'] === 'Inactive') ? 'Inactive' : 'Active';
+    // Collect inputs (values are bound as parameters below)
+    $first_name  = trim($_POST['first_name'] ?? '');
+    $last_name   = trim($_POST['last_name'] ?? '');
+    $email       = trim($_POST['email'] ?? '');
+    $phone       = trim($_POST['phone'] ?? '');
+    $department  = trim($_POST['department'] ?? '');
+    $position    = trim($_POST['position'] ?? '');
+    $salary      = trim($_POST['salary'] ?? '');
+    $hire_date   = trim($_POST['hire_date'] ?? '');
+    $status      = (($_POST['status'] ?? '') === 'Inactive') ? 'Inactive' : 'Active';
 
     // Validate
     if (!$first_name) {
@@ -54,18 +54,36 @@ if ($salary !== '' && !is_numeric($salary)) {
 
     // Insert
     if (!$errors) {
-        $salaryVal = $salary !== '' ? "'$salary'" : 'NULL';
-        $dateVal   = $hire_date   !== '' ? "'$hire_date'"   : 'NULL';
+        $salaryVal = $salary   !== '' ? (float) $salary : null;
+        $dateVal   = $hire_date !== '' ? $hire_date     : null;
 
-        $sql = "INSERT INTO employees (first_name, last_name, email, phone, department, position, salary, hire_date, status)
-                VALUES ('$first_name','$last_name','$email','$phone','$department','$position',$salaryVal,$dateVal,'$status')";
+        $stmt = $conn->prepare("
+            INSERT INTO employees (first_name, last_name, email, phone, department, position, salary, hire_date, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
 
-        if (mysqli_query($conn, $sql)) {
+        $stmt->bind_param(
+            "ssssssdss",
+            $first_name,
+            $last_name,
+            $email,
+            $phone,
+            $department,
+            $position,
+            $salaryVal,
+            $dateVal,
+            $status
+        );
+
+        $inserted = $stmt->execute();
+        $stmt->close();
+
+        if ($inserted) {
             header('Location: employees.php?success=added');
             exit;
-        } else {
-            $errors[] = 'Database error: ' . mysqli_error($conn);
         }
+
+        $errors[] = 'Database error: could not add employee.';
     }
 }
 

@@ -3,14 +3,20 @@
 require_once 'config/database.php';
 
 // Delete handler (needs header redirect — must run before HTML)
+$deleteFailed = false;
 if (isset($_GET['delete'])) {
-    $id  = (int) $_GET['delete'];
-    $sql = "DELETE FROM employees WHERE id = $id";
-    if (mysqli_query($conn, $sql)) {
+    $id   = (int) $_GET['delete'];
+    $stmt = $conn->prepare("DELETE FROM employees WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $deleted = $stmt->execute();
+    $stmt->close();
+
+    if ($deleted) {
         header('Location: employees.php?success=deleted');
         exit;
     }
     // If delete failed we fall through and show the error below
+    $deleteFailed = true;
 }
 
 // ── Now safe to output HTML ────────────────────────────
@@ -28,7 +34,7 @@ if (isset($_GET['success'])) {
     $success = $map[$_GET['success']] ?? '';
 }
 
-if (isset($_GET['delete']) && !isset($success)) {
+if ($deleteFailed) {
     $error = 'Delete failed. Please try again.';
 }
 
@@ -56,14 +62,24 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
 <!-- ── Toolbar ─────────────────────────────────────────── -->
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <div class="search-wrap flex-grow-1" style="max-width:380px;">
-    <label for="searchInput" class="visually-hidden">
-        Search employees
-    </label>
+        <label for="searchInput" class="visually-hidden">Search employees</label>
+        <i class="bi bi-search"></i>
+        <input type="text" id="searchInput" class="form-control"
+               placeholder="Search employees…">
+    </div>
 
-    <i class="bi bi-search"></i>
+    <label for="statusFilter" class="visually-hidden">Filter by status</label>
+    <select id="statusFilter" class="form-select" style="max-width:170px;">
+        <option value="">All statuses</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+    </select>
 
-    <input type="text" id="searchInput" class="form-control"
-           placeholder="Search employees…">
+    <span id="resultCount" style="color:var(--muted);font-size:.8rem;"></span>
+
+    <a href="add_employee.php" class="btn btn-accent ms-auto">
+        <i class="bi bi-person-plus-fill me-1"></i> Add Employee
+    </a>
 </div>
 
 <!-- ── Table card ─────────────────────────────────────── -->
@@ -92,9 +108,9 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
             <tbody>
             <?php $i = 1; while ($emp = mysqli_fetch_assoc($result)) :
                 $initials = strtoupper(substr($emp['first_name'],0,1).substr($emp['last_name'],0,1));
-                $col      = $colours[crc32($emp['email']) % count($colours)];
+                $col      = $colours[abs(crc32($emp['email'])) % count($colours)];
             ?>
-                <tr>
+                <tr data-employee data-status="<?= htmlspecialchars($emp['status']) ?>">
                     <td style="color:var(--muted);font-size:.78rem;"><?= $i++ ?></td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
@@ -116,7 +132,7 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
                     </td>
                     <td>
                         <span class="status-badge <?= $emp['status']==='Active' ? 'badge-active' : 'badge-inactive' ?>">
-                            <?= $emp['status'] ?>
+                            <?= htmlspecialchars($emp['status']) ?>
                         </span>
                     </td>
                     <td>
@@ -132,6 +148,11 @@ $colours = ['#e94560','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
                     </td>
                 </tr>
             <?php endwhile; ?>
+                <tr id="noResultsRow" style="display:none;">
+                    <td colspan="9" class="text-center py-4" style="color:var(--muted);">
+                        <i class="bi bi-search me-1"></i> No employees match your search.
+                    </td>
+                </tr>
             </tbody>
         </table>
         <?php endif; ?>
